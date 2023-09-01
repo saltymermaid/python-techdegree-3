@@ -21,6 +21,24 @@ PHRASES = [
 ]
 
 NUM_GUESSES = 5
+DISPLAY_WIDTH = 60
+
+FLAG = """
+888888888888888888888888888888888888888888888888888888888888
+888888888888888888888888888888888888888888888888888888888888
+8888888888888888888888888P""  ""9888888888888888888888888888
+8888888888888888P"88888P          988888"9888888888888888888
+8888888888888888  "9888            888P"  888888888888888888
+888888888888888888bo "9  d8o  o8b  P" od88888888888888888888
+888888888888888888888bob 98"  "8P dod88888888888888888888888
+888888888888888888888888    db    88888888888888888888888888
+88888888888888888888888888      8888888888888888888888888888
+88888888888888888888888P"9bo  odP"98888888888888888888888888
+88888888888888888888P" od88888888bo "98888888888888888888888
+888888888888888888   d88888888888888b   88888888888888888888
+8888888888888888888oo8888888888888888oo888888888888888888888
+888888888888888888888888888888888888888888888888888888888888
+"""
 
 class Game:
     def __init__(self):
@@ -31,6 +49,7 @@ class Game:
 
 
     def make_phrases():
+        """Create a list of phrases"""
         phrases = []
         for phrase in PHRASES:
             phrases.append(Phrase(phrase))
@@ -38,67 +57,81 @@ class Game:
 
 
     def start(self):
+        """Start the game"""
         Game.welcome()
         self.get_random_phrase()
         phrase = self.active_phrase
         guesses = self.guesses
-        in_progress = True
-        # show the phrase before guessing starts
         phrase.display(guesses)
-        while in_progress:
+        while not self.game_over():
             guess = self.get_guess()
             correct = phrase.check_letter(guess)
             if not correct:
+                print("Arr, not quite!")
                 self.missed += 1
-            print(f"You have {NUM_GUESSES - self.missed} remaining misses.")
+            else:
+                print("Yar, ye got it!")
+            print(f"Ye've got {self.missed} blunders an' still have {NUM_GUESSES - self.missed} chances left, arr!")
             phrase.display(guesses)
-            in_progress = self.game_should_continue()
 
 
     def get_random_phrase(self):
+        """Get a random phrase from the phrases list"""
         self.active_phrase = random.choice(self.phrases)
         pass
 
 
     def welcome():
-        print("Welcome to Phrase Hunter!!!")
+        """Display welcome message"""
+        print('*' * DISPLAY_WIDTH)
+        print("*" + ' ' * (DISPLAY_WIDTH - 2) + "*")
+        print("* " + "Ahoy, welcome to Phrase Huntin', ye scallywag!!!".center(DISPLAY_WIDTH - 4, ' ') + " *")
+        print("* " + f"Ye be havin' {NUM_GUESSES} shots to suss out th' sayin'.".center(DISPLAY_WIDTH - 4, ' ') + " *")
+        print("*" + ' ' * (DISPLAY_WIDTH - 2) + "*")
+        print('*' * DISPLAY_WIDTH)
 
 
     def get_guess(self):
+        """Get a valid guess from the user"""
         valid = False
         while not valid:
-            guessed_letter = input("Please choose a letter > ").lower()
+            guessed_letter = input("\nPick yar letter, if ye please > ").lower()
             if len(guessed_letter) == 1 and guessed_letter.isalpha():
+                print()
                 if guessed_letter in self.guesses:
-                    print(f"You've already guessed {guessed_letter}.")
+                    print(f"Yar, ye've already wagered on {guessed_letter}, matey.")
                 else:
                     valid = True
         self.guesses.append(guessed_letter)
         return guessed_letter
 
 
-    def game_should_continue(self):
+    def game_over(self):
+        """Check if the game should end"""
         solved = self.active_phrase.check_complete(self.guesses)
         if self.missed < 5 and not solved:
-            return True
+            return False
         elif solved:
-            print("You got it!!")
+            print("Shiver me timbers, ye've got th' phrase!!")
         else:
-            print(f"You're out of guesses. The phrase is: ")
+            print(FLAG)
+            print(f"Yar out o' chances. Th' phrase be: ")
             self.active_phrase.display(set(self.active_phrase.phrase))
-        self.game_over()
-        return False
+        self.play_again()
+        return True
 
 
-    def game_over(self):
-        go_again = input("Do you want to play again? Y/N > ").lower()
+    def play_again(self):
+        """Ask the user if they want to play again"""
+        go_again = input("Wish to sail these seas once more? Y/N > ").lower()
         if go_again == 'y':
             self.reset_game()
         else:
-            print("Thank you for playing!!")
+            print("Me thanks fer joinin' th' game, ye hearty!!")
 
 
     def reset_game(self):
+        """Reset the game"""
         self.missed = 0
         self.active_phrase = None
         self.guesses = []
